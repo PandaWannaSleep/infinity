@@ -20,6 +20,7 @@ import config;
 import infinity_context;
 import analyzer;
 import chinese_analyzer;
+import japanese_analyzer;
 import standard_analyzer;
 import ngram_analyzer;
 
@@ -39,7 +40,7 @@ UniquePtr<Analyzer> AnalyzerPool::Get(const std::string_view &name) {
     switch (Str2Int(name.data())) {
         case Str2Int(CHINESE.data()): {
             Analyzer *prototype = cache_[CHINESE].get();
-            if (prototype == nullptr) {
+            if (prototype == nullptr) {     //create new instance if not exists
                 String path;
                 Config *config = InfinityContext::instance().config();
                 if (config == nullptr) {
@@ -57,6 +58,25 @@ UniquePtr<Analyzer> AnalyzerPool::Get(const std::string_view &name) {
             }
             return MakeUnique<ChineseAnalyzer>(*reinterpret_cast<ChineseAnalyzer *>(prototype));
         } break;
+        case Str2Int(JAPANESE.data()): {
+            Analyzer *prototype = cache_[JAPANESE].get();
+            if (prototype == nullptr) {
+                String path;
+                Config *config = InfinityContext::instance().config();
+                if (config == nullptr) {
+                    path = "/var/infinity/resource";
+                } else {
+                    path = config->ResourcePath();
+                }
+                UniquePtr<JapaneseAnalyzer> analyzer = MakeUnique<JapaneseAnalyzer>(std::move(path));
+                if (!analyzer->Load())
+                    return nullptr;
+                }
+                prototype = analyzer.get();
+                cache_[JAPANESE] = std::move(analyzer);
+            }
+            return MakeUnique<JapaneseAnalyzer>(*reinterpret_cast<JapaneseAnalyzer *>(prototype));
+        }
         case Str2Int(STANDARD.data()): {
             return MakeUnique<StandardAnalyzer>();
         }

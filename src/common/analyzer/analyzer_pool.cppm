@@ -35,6 +35,7 @@ public:
     static constexpr std::string_view CHINESE = "chinese";
     static constexpr std::string_view STANDARD = "standard";
     static constexpr std::string_view NGRAM = "ngram";
+    static constexpr std::string_view JAPANESE = "japanese";
 
 private:
     CacheType cache_{};
